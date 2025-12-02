@@ -1,7 +1,12 @@
-import React from 'react'
+import { caller } from '@/trpc/server';
 
-export default function Page() {
+const Page = async () => {
+  const users = await caller.getUsers();
   return (
-    <div>page</div>
-  )
-}
+    <div className="text-red-500 font-bold text-3xl">
+      {JSON.stringify(users)}
+    </div>
+  );
+};
+
+export default Page;w
