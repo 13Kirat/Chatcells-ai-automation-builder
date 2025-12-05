@@ -12,13 +12,13 @@ export const helloWorld = inngest.createFunction(
 		await step.sleep("wait-a-moment", "5s");
 		await step.sleep("wait-a-moment", "5s");
 		await step.sleep("wait-a-moment", "5s");
-		await step.run("create-workflow", () => {
-			return prisma.workflow.create({
-				data: {
-					name: "test-workflow",
-				},
-			});
-		});
+		// await step.run("create-workflow", () => {
+		// 	return prisma.workflow.create({
+		// 		data: {
+		// 			name: "test-workflow",
+		// 		},
+		// 	});
+		// });
 	}
 );
 
