@@ -32,7 +32,7 @@ export const UpgradeModal = ({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogAction onClick={() => {
-                        authClient.checkout({ slug: 'nodebase'});
+                        authClient.checkout({ slug: "Chatcells-Pro" });
                         onOpenChange(false);
                     }}>
                         Upgrade Now
