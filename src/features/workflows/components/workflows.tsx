@@ -114,7 +114,7 @@ export const WorkflowsEmpty = () => {
                 handleError(error);
             },
             onSuccess: (data) => {
-                router.push(`/workflow/${data.id}`)
+                router.push(`/workflows/${data.id}`)
             }
         });
     };
