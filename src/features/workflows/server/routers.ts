@@ -7,8 +7,8 @@ import {
 } from "@/trpc/init";
 import z from "zod";
 import { PAGINATION } from "@/config/constants";
-import { NodeType } from "@/generated/prisma";
 import type { Edge, Node } from "@xyflow/react";
+import { NodeType } from "@/generated/prisma/enums";
 
 export const workflowsRouter = createTRPCRouter({
 	create: premiumProcedure.mutation(({ ctx }) => {
