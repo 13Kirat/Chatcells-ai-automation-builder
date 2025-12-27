@@ -20,15 +20,15 @@ export const HttpRequestNode = memo((props: NodeProps<HttpRequestNodeType>) => {
 
     return (
         <>
-        <BaseExecutionNode
-            {...props}
-            id={props.id}
-            icon={GlobeIcon}
-            name='HTTP Request'
-            description={description}
-            onSettings={() => {} }
-            onDoubleClick={() => {} }
-        />
+            <BaseExecutionNode
+                {...props}
+                id={props.id}
+                icon={GlobeIcon}
+                name='HTTP Request'
+                description={description}
+                onSettings={() => { }}
+                onDoubleClick={() => { }}
+            />
         </>
     );
 });

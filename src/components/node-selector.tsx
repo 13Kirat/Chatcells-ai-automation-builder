@@ -96,7 +96,7 @@ export function NodeSelector({
 
         onOpenChange(false);
         
-    }, []);
+    }, [setNodes, getNodes, onOpenChange, screenToFlowPosition]);
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
