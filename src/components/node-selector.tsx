@@ -16,7 +16,7 @@ import {
     GlobeIcon,
     MousePointerIcon,
 } from 'lucide-react';
-import { NodeType } from "@/generated/prisma/enums";
+import { NodeType } from '@/generated/prisma/enums';
 import { Separator } from './ui/separator';
 
 export type NodeTypeOption = {
@@ -33,6 +33,12 @@ const triggerNodes: NodeTypeOption[] = [
         label: 'Trigger manually',
         description: 'Runs the flow on clicking a button. Good for getting started quickly',
         icon: MousePointerIcon,
+    },
+    {
+        type: NodeType.GOOGLE_FORM_TRIGGER,
+        label: 'Google Form',
+        description: 'Runs the flow when a Google Form is submitted',
+        icon: '/logos/googleform.svg',
     },
 ];
 
@@ -96,7 +102,12 @@ export function NodeSelector({
 
         onOpenChange(false);
 
-    }, [setNodes, getNodes, onOpenChange, screenToFlowPosition]);
+    }, [
+        setNodes,
+        getNodes,
+        screenToFlowPosition,
+        onOpenChange,
+    ]);
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
