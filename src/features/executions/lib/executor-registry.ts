@@ -5,6 +5,7 @@ import { NodeType } from "@/generated/prisma/enums";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
 	[NodeType.MANUAL_TRIGGER]: manualTriggerExecutor,
+	// @ts-ignore
 	[NodeType.HTTP_REQUEST]: httpRequestExecutor,
 	[NodeType.INITIAL]: manualTriggerExecutor,
 	[NodeType.GOOGLE_FORM_TRIGGER]: manualTriggerExecutor,
