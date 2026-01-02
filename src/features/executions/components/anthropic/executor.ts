@@ -1,140 +1,143 @@
-import Handlebars from 'handlebars';
+import Handlebars from "handlebars";
 import type { NodeExecutor } from "@/features/executions/types";
 import { NonRetriableError } from "inngest";
-import { createAnthropic } from '@ai-sdk/anthropic';
-import { generateText } from 'ai';
-import { anthropicChannel } from '@/inngest/channels/anthropic';
-import prisma from '@/lib/db';
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { generateText } from "ai";
+import { anthropicChannel } from "@/inngest/channels/anthropic";
+import prisma from "@/lib/db";
 
-Handlebars.registerHelper('json', (context) => {
-    const jsonString = JSON.stringify(context, null, 2);
-    const safeString = new Handlebars.SafeString(jsonString);
+Handlebars.registerHelper("json", (context) => {
+	const jsonString = JSON.stringify(context, null, 2);
+	const safeString = new Handlebars.SafeString(jsonString);
 
-    return safeString;
+	return safeString;
 });
 
 type anthropicData = {
-    variableName?: string;
-    credentialId?: string;
-    systemPrompt?: string;
-    userPrompt?: string;
+	variableName?: string;
+	credentialId?: string;
+	systemPrompt?: string;
+	userPrompt?: string;
 };
 
 export const anthropicExecutor: NodeExecutor<anthropicData> = async ({
-    data,
-    nodeId,
-    context,
-    step,
-    publish,
+	data,
+	nodeId,
+	context,
+	step,
+	publish,
+	userId,
 }) => {
-    // Publish 'loading' state for http request
-    await publish(
-        anthropicChannel().status({
-            nodeId,
-            status: 'loading',
-        }),
-    );
+	// Publish 'loading' state for http request
+	await publish(
+		anthropicChannel().status({
+			nodeId,
+			status: "loading",
+		})
+	);
 
-    if (!data.variableName) {
-        await publish(
-            anthropicChannel().status({
-                nodeId,
-                status: 'error',
-            }),
-        );
+	if (!data.variableName) {
+		await publish(
+			anthropicChannel().status({
+				nodeId,
+				status: "error",
+			})
+		);
 
-        throw new NonRetriableError('Anthropic node: Variable name is missing');
-    };
+		throw new NonRetriableError("Anthropic node: Variable name is missing");
+	}
 
-    if (!data.credentialId) {
-            await publish(
-                anthropicChannel().status({
-                    nodeId,
-                    status: 'error',
-                }),
-            );
-    
-            throw new NonRetriableError('Anthropic node: Credential is required');
-        };
-    
+	if (!data.credentialId) {
+		await publish(
+			anthropicChannel().status({
+				nodeId,
+				status: "error",
+			})
+		);
 
-    if (!data.userPrompt) {
-        await publish(
-            anthropicChannel().status({
-                nodeId,
-                status: 'error',
-            }),
-        );
+		throw new NonRetriableError("Anthropic node: Credential is required");
+	}
 
-        throw new NonRetriableError('Anthropic node: User prompt is missing');
-    };
+	if (!data.userPrompt) {
+		await publish(
+			anthropicChannel().status({
+				nodeId,
+				status: "error",
+			})
+		);
 
-    const systemPrompt = data.systemPrompt
-        ? Handlebars.compile(data.systemPrompt)(context)
-        : 'You are a helpful assistant';
-    const userPrompt = Handlebars.compile(data.userPrompt)(context);
+		throw new NonRetriableError("Anthropic node: User prompt is missing");
+	}
 
-    // TODO: Fetch credentials that user selected
-    const credential = await step.run('get-credential', async () => {
-        
-        return prisma.credential.findUnique({
-            where: {
-                id: data.credentialId,
-            },
-        });
-    });
+	const systemPrompt = data.systemPrompt
+		? Handlebars.compile(data.systemPrompt)(context)
+		: "You are a helpful assistant";
+	const userPrompt = Handlebars.compile(data.userPrompt)(context);
 
-    if (!credential) {
-        throw new NonRetriableError('Credential not found');
-    };
+	// TODO: Fetch credentials that user selected
+	const credential = await step.run("get-credential", async () => {
+		return prisma.credential.findUnique({
+			where: {
+				id: data.credentialId,
+				userId,
+			},
+		});
+	});
 
-    const anthropic = createAnthropic({
-        apiKey: credential.value,
-        
-    });
+	if (!credential) {
+		await publish(
+			anthropicChannel().status({
+				nodeId,
+				status: "error",
+			})
+		);
+		throw new NonRetriableError("Credential not found");
+	}
 
-    try {
-        const { steps } = await step.ai.wrap(
-            'anthropic-generate-text',
-            generateText,
-            {
-                model: anthropic('claude-sonnet-4-5'),
-                system: systemPrompt,
-                prompt: userPrompt,
-                experimental_telemetry: {
-                    isEnabled: true,
-                    recordInputs: true,
-                    recordOutputs: true,
-                },
-            },
-        );
+	const anthropic = createAnthropic({
+		apiKey: credential.value,
+	});
 
-        const text = 
-            steps[0].content[0].type === 'text'
-            ? steps[0].content[0].text
-            : '';
-        
-        await publish(
-            anthropicChannel().status({
-                nodeId,
-                status: 'success',
-            }),
-        );
+	try {
+		const { steps } = await step.ai.wrap(
+			"anthropic-generate-text",
+			generateText,
+			{
+				model: anthropic("claude-sonnet-4-5"),
+				system: systemPrompt,
+				prompt: userPrompt,
+				experimental_telemetry: {
+					isEnabled: true,
+					recordInputs: true,
+					recordOutputs: true,
+				},
+			}
+		);
 
-        return {
-            ...context,
-            [data.variableName]: {
-                 text,
-            },
-        }
-    } catch (error) {
-        await publish(
-            anthropicChannel().status({
-                nodeId,
-                status: 'error',
-            }),
-        );
+		const text =
+			steps[0].content[0].type === "text" ? steps[0].content[0].text : "";
 
-        throw error;
-    }
-}
+		await publish(
+			anthropicChannel().status({
+				nodeId,
+				status: "success",
+			})
+		);
+
+		return {
+			...context,
+			[data.variableName]: {
+				text,
+			},
+		};
+	} catch (error) {
+		await publish(
+			anthropicChannel().status({
+				nodeId,
+				status: "error",
+			})
+		);
+
+		throw error;
+	}
+};

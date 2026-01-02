@@ -1,138 +1,142 @@
-import Handlebars from 'handlebars';
+import Handlebars from "handlebars";
 import type { NodeExecutor } from "@/features/executions/types";
 import { NonRetriableError } from "inngest";
-import { createOpenAI } from '@ai-sdk/openai';
-import { generateText } from 'ai';
-import { openaiChannel } from '@/inngest/channels/openai';
-import prisma from '@/lib/db';
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
+import { openaiChannel } from "@/inngest/channels/openai";
+import prisma from "@/lib/db";
 
-Handlebars.registerHelper('json', (context) => {
-    const jsonString = JSON.stringify(context, null, 2);
-    const safeString = new Handlebars.SafeString(jsonString);
+Handlebars.registerHelper("json", (context) => {
+	const jsonString = JSON.stringify(context, null, 2);
+	const safeString = new Handlebars.SafeString(jsonString);
 
-    return safeString;
+	return safeString;
 });
 
 type OpenAiData = {
-    variableName?: string;
-    credentialId?: string;
-    systemPrompt?: string;
-    userPrompt?: string;
+	variableName?: string;
+	credentialId?: string;
+	systemPrompt?: string;
+	userPrompt?: string;
 };
 
 export const openaiExecutor: NodeExecutor<OpenAiData> = async ({
-    data,
-    nodeId,
-    context,
-    step,
-    publish,
+	data,
+	nodeId,
+	userId,
+	context,
+	step,
+	publish,
 }) => {
-    // Publish 'loading' state for http request
-    await publish(
-       openaiChannel().status({
-            nodeId,
-            status: 'loading',
-        }),
-    );
+	// Publish 'loading' state for http request
+	await publish(
+		openaiChannel().status({
+			nodeId,
+			status: "loading",
+		})
+	);
 
-    if (!data.variableName) {
-        await publish(
-            openaiChannel().status({
-                nodeId,
-                status: 'error',
-            }),
-        );
+	if (!data.variableName) {
+		await publish(
+			openaiChannel().status({
+				nodeId,
+				status: "error",
+			})
+		);
 
-        throw new NonRetriableError('OpenAi node: Variable name is missing');
-    };
+		throw new NonRetriableError("OpenAi node: Variable name is missing");
+	}
 
-    if (!data.credentialId) {
-            await publish(
-                openaiChannel().status({
-                    nodeId,
-                    status: 'error',
-                }),
-            );
-    
-            throw new NonRetriableError('OpenAi node: Credential is required');
-        };
-    
+	if (!data.credentialId) {
+		await publish(
+			openaiChannel().status({
+				nodeId,
+				status: "error",
+			})
+		);
 
-    if (!data.userPrompt) {
-        await publish(
-            openaiChannel().status({
-                nodeId,
-                status: 'error',
-            }),
-        );
+		throw new NonRetriableError("OpenAi node: Credential is required");
+	}
 
-        throw new NonRetriableError('OpenAi node: User prompt is missing');
-    };
+	if (!data.userPrompt) {
+		await publish(
+			openaiChannel().status({
+				nodeId,
+				status: "error",
+			})
+		);
 
-    const systemPrompt = data.systemPrompt
-        ? Handlebars.compile(data.systemPrompt)(context)
-        : 'You are a helpful assistant';
-    const userPrompt = Handlebars.compile(data.userPrompt)(context);
+		throw new NonRetriableError("OpenAi node: User prompt is missing");
+	}
 
-    const credential = await step.run('get-credential', async () => {
+	const systemPrompt = data.systemPrompt
+		? Handlebars.compile(data.systemPrompt)(context)
+		: "You are a helpful assistant";
+	const userPrompt = Handlebars.compile(data.userPrompt)(context);
 
-        return prisma.credential.findUnique({
-            where: {
-                id: data.credentialId,
-            },
-        });
-    });
+	const credential = await step.run("get-credential", async () => {
+		return prisma.credential.findUnique({
+			where: {
+				id: data.credentialId,
+				userId,
+			},
+		});
+	});
 
-    if (!credential) {
-        throw new NonRetriableError('Credential not found');
-    };
+	if (!credential) {
+		await publish(
+			openaiChannel().status({
+				nodeId,
+				status: "error",
+			})
+		);
+		throw new NonRetriableError("Credential not found");
+	}
 
-    const openai = createOpenAI({
-        apiKey: credential.value,
-    });
+	const openai = createOpenAI({
+		apiKey: credential.value,
+	});
 
-    try {
-        const { steps } = await step.ai.wrap(
-            'OpenAi-generate-text',
-            generateText,
-            {
-                model: openai('gpt-4'),
-                system: systemPrompt,
-                prompt: userPrompt,
-                experimental_telemetry: {
-                    isEnabled: true,
-                    recordInputs: true,
-                    recordOutputs: true,
-                },
-            },
-        );
+	try {
+		const { steps } = await step.ai.wrap(
+			"OpenAi-generate-text",
+			generateText,
+			{
+				model: openai("gpt-4"),
+				system: systemPrompt,
+				prompt: userPrompt,
+				experimental_telemetry: {
+					isEnabled: true,
+					recordInputs: true,
+					recordOutputs: true,
+				},
+			}
+		);
 
-        const text = 
-            steps[0].content[0].type === 'text'
-            ? steps[0].content[0].text
-            : '';
-        
-        await publish(
-            openaiChannel().status({
-                nodeId,
-                status: 'success',
-            }),
-        );
+		const text =
+			steps[0].content[0].type === "text" ? steps[0].content[0].text : "";
 
-        return {
-            ...context,
-            [data.variableName]: {
-                 text,
-            },
-        }
-    } catch (error) {
-        await publish(
-            openaiChannel().status({
-                nodeId,
-                status: 'error',
-            }),
-        );
+		await publish(
+			openaiChannel().status({
+				nodeId,
+				status: "success",
+			})
+		);
 
-        throw error;
-    }
-}
+		return {
+			...context,
+			[data.variableName]: {
+				text,
+			},
+		};
+	} catch (error) {
+		await publish(
+			openaiChannel().status({
+				nodeId,
+				status: "error",
+			})
+		);
+
+		throw error;
+	}
+};
