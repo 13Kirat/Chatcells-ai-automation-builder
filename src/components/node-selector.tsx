@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { NodeType } from '@/generated/prisma/enums';
 import { Separator } from './ui/separator';
+import Image from 'next/image';
 
 export type NodeTypeOption = {
     type: NodeType;
@@ -37,9 +38,15 @@ const triggerNodes: NodeTypeOption[] = [
     {
         type: NodeType.GOOGLE_FORM_TRIGGER,
         label: 'Google Form',
-        description: 'Runs the flow when a Google Form is submitted',
+        description: 'Runs the flow when a GoogleForm is submitted',
         icon: '/logos/googleform.svg',
     },
+    // {
+    //     type: NodeType.STRIPE_TRIGGER,
+    //     label: 'Stripe Event',
+    //     description: 'Runs the flow when a Stripe Event is submitted',
+    //     icon: '/logos/stripe.svg',
+    // },
 ];
 
 const executionNodes: NodeTypeOption[] = [
@@ -131,7 +138,7 @@ export function NodeSelector({
                             >
                                 <div className='flex items-center gap-6 w-full overflow-hidden'>
                                     {typeof Icon === 'string' ? (
-                                        <img
+                                        <Image
                                             src={Icon}
                                             alt={nodeType.label}
                                             className='size-5 object-contain rounded-sm'
@@ -163,7 +170,7 @@ export function NodeSelector({
                             >
                                 <div className='flex items-center gap-6 w-full overflow-hidden'>
                                     {typeof Icon === 'string' ? (
-                                        <img
+                                        <Image
                                             src={Icon}
                                             alt={nodeType.label}
                                             className='size-5 object-contain rounded-sm'
