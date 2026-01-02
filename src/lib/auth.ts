@@ -23,9 +23,9 @@ export const auth = betterAuth({
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
 		},
 	},
-	// trustedOrigins: [
-	// 	"https://3000-firebase-nodebase-1760493652353.cluster-fbfjltn375c6wqxlhoehbz44sk.cloudworkstations.dev",
-	// ],
+	trustedOrigins: [
+		"https://chatcells-ai-automation-builder.vercel.app",
+	],
 	plugins: [
 		polar({
 			client: polarClient,
