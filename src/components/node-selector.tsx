@@ -168,7 +168,7 @@ export function NodeSelector({
                             >
                                 <div className='flex items-center gap-6 w-full overflow-hidden'>
                                     {typeof Icon === 'string' ? (
-                                        <Image
+                                        <img
                                             src={Icon}
                                             alt={nodeType.label}
                                             className='size-5 object-contain rounded-sm'
@@ -200,7 +200,7 @@ export function NodeSelector({
                             >
                                 <div className='flex items-center gap-6 w-full overflow-hidden'>
                                     {typeof Icon === 'string' ? (
-                                        <Image
+                                        <img
                                             src={Icon}
                                             alt={nodeType.label}
                                             className='size-5 object-contain rounded-sm'
