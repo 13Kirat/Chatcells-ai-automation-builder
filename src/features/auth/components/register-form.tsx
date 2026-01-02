@@ -33,10 +33,10 @@ const registerSchema = z.object({
     password: z.string().min(1, 'Password is required'),
     confirmPassword: z.string(),
 })
-.refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-});
+    .refine((data) => data.password === data.confirmPassword, {
+        message: "Passwords do not match",
+        path: ["confirmPassword"],
+    });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
@@ -51,6 +51,32 @@ export function RegisterForm() {
             confirmPassword: '',
         },
     });
+
+    const signInGithub = async () => {
+        await authClient.signIn.social({
+            provider: "github"
+        }, {
+            onSuccess: () => {
+                router.push('/');
+            },
+            onError: () => {
+                toast.error('Something went wrong');
+            },
+        })
+    };
+
+    const signInGoogle = async () => {
+        await authClient.signIn.social({
+            provider: "google",
+        }, {
+            onSuccess: () => {
+                router.push('/');
+            },
+            onError: () => {
+                toast.error('Something went wrong');
+            },
+        })
+    };
 
     const onSubmit = async (values: RegisterFormValues) => {
         await authClient.signUp.email(
@@ -71,7 +97,7 @@ export function RegisterForm() {
             }
         )
     };
-    
+
     const isPending = form.formState.isSubmitting;
 
     return (
@@ -79,7 +105,7 @@ export function RegisterForm() {
             <Card className='text-center'>
                 <CardHeader >
                     <CardTitle>Get Started</CardTitle>
-                <CardDescription>Create your account to get started</CardDescription>
+                    <CardDescription>Create your account to get started</CardDescription>
 
                 </CardHeader>
                 <CardContent>
@@ -92,13 +118,14 @@ export function RegisterForm() {
                                         className='w-full'
                                         type='button'
                                         disabled={isPending}
+                                        onClick={signInGithub}
                                     >
                                         <Image
-                                             src='logos/github.svg'
-                                             width={20}
-                                             height={20}
-                                             alt='Github'
-                                         />
+                                            src='logos/github.svg'
+                                            width={20}
+                                            height={20}
+                                            alt='Github'
+                                        />
                                         Continue with Github
                                     </Button>
                                     <Button
@@ -106,18 +133,19 @@ export function RegisterForm() {
                                         className='w-full'
                                         type='button'
                                         disabled={isPending}
+                                        onClick={signInGoogle}
                                     >
                                         <Image
-                                             src='logos/google.svg'
-                                             width={20}
-                                             height={20}
-                                             alt='Google'
-                                         />
+                                            src='logos/google.svg'
+                                            width={20}
+                                            height={20}
+                                            alt='Google'
+                                        />
                                         Continue with Google
                                     </Button>
                                 </div>
                                 <div className='grid gap-6'>
-                                    <FormField 
+                                    <FormField
                                         control={form.control}
                                         name='email'
                                         render={({ field }) => (
@@ -134,7 +162,7 @@ export function RegisterForm() {
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField 
+                                    <FormField
                                         control={form.control}
                                         name='password'
                                         render={({ field }) => (
@@ -151,7 +179,7 @@ export function RegisterForm() {
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField 
+                                    <FormField
                                         control={form.control}
                                         name='confirmPassword'
                                         render={({ field }) => (
@@ -175,7 +203,7 @@ export function RegisterForm() {
                                 <div className='text-center text-sm'>
                                     Already have an account?{' '}
                                     <Link href={'/login'} className='underline underline-offset-4'>
-                                    Login
+                                        Login
                                     </Link>
                                 </div>
                             </div>
@@ -186,4 +214,3 @@ export function RegisterForm() {
         </div>
     )
 };
-

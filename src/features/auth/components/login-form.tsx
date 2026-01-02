@@ -25,9 +25,8 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import { authClient } from '@/lib/auth-client';
-// import { authClient } from '@/lib/auth-client';
+
 
 const loginSchema = z.object({
     email: z.email("Please enter a valid email address"),
@@ -47,23 +46,48 @@ export function LoginForm() {
         },
     });
 
+    const signInGithub = async () => {
+        await authClient.signIn.social({
+            provider: "github"
+        }, {
+            onSuccess: () => {
+                router.push('/');
+            },
+            onError: () => {
+                toast.error('Something went wrong');
+            },
+        })
+    };
+
+    const signInGoogle = async () => {
+        await authClient.signIn.social({
+            provider: "google",
+        }, {
+            onSuccess: () => {
+                router.push('/');
+            },
+            onError: () => {
+                toast.error('Something went wrong');
+            },
+        })
+    };
     const onSubmit = async (values: LoginFormValues) => {
         await authClient.signIn.email({
             email: values.email,
             password: values.password,
             callbackURL: '/',
         },
-        {
-            onSuccess: () => {
-                router.push('/');
-            },
-            onError: (ctx) => {
-                toast.error(ctx.error.message);
+            {
+                onSuccess: () => {
+                    router.push('/');
+                },
+                onError: (ctx) => {
+                    toast.error(ctx.error.message);
+                }
             }
-        }
-    )
+        )
     };
-    
+
     const isPending = form.formState.isSubmitting;
 
     return (
@@ -73,7 +97,7 @@ export function LoginForm() {
                     <CardTitle>Login</CardTitle>
                     <CardDescription>Login to continue</CardDescription>
                 </CardHeader>
-                
+
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -84,13 +108,14 @@ export function LoginForm() {
                                         className='w-full'
                                         type='button'
                                         disabled={isPending}
+                                        onClick={signInGithub}
                                     >
                                         <Image
-                                         src='logos/github.svg'
-                                         width={20}
-                                         height={20}
-                                         alt='Github'
-                                         />
+                                            src='logos/github.svg'
+                                            width={20}
+                                            height={20}
+                                            alt='Github'
+                                        />
                                         Continue with Github
                                     </Button>
                                     <Button
@@ -98,18 +123,19 @@ export function LoginForm() {
                                         className='w-full'
                                         type='button'
                                         disabled={isPending}
+                                        onClick={signInGoogle}
                                     >
                                         <Image
-                                         src='logos/google.svg'
-                                         width={20}
-                                         height={20}
-                                         alt='Google'
-                                         />
+                                            src='logos/google.svg'
+                                            width={20}
+                                            height={20}
+                                            alt='Google'
+                                        />
                                         Continue with Google
                                     </Button>
                                 </div>
                                 <div className='grid gap-6'>
-                                    <FormField 
+                                    <FormField
                                         control={form.control}
                                         name='email'
                                         render={({ field }) => (
@@ -126,7 +152,7 @@ export function LoginForm() {
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField 
+                                    <FormField
                                         control={form.control}
                                         name='password'
                                         render={({ field }) => (
@@ -150,7 +176,7 @@ export function LoginForm() {
                                 <div className='text-center text-sm'>
                                     Don&apos;t have an account?{' '}
                                     <Link href={'/signup'} className='underline underline-offset-4'>
-                                    Sign Up
+                                        Sign Up
                                     </Link>
                                 </div>
                             </div>
