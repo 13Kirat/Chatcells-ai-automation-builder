@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 import {
     Card,
     CardContent,
-    CardHeader,
     CardDescription,
     CardTitle,
 } from "./ui/card";
@@ -29,7 +28,7 @@ import {
 type EntityHeaderProps = {
     title: string;
     description?: string;
-    newButtonLabel: string;
+    newButtonLabel?: string;
     disabled?: boolean;
     isCreating?: boolean;
 } & (

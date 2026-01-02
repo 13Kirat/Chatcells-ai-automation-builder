@@ -188,3 +188,6 @@ model Execution {
 
   output Json?
 }
+
+
+// to update : npx prisma migrate dev 
