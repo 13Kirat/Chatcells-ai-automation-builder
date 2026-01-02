@@ -136,5 +136,5 @@ export const anthropicExecutor: NodeExecutor<anthropicData> = async ({
         );
 
         throw error;
-    };
+    }
 }

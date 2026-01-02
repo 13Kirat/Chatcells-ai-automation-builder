@@ -134,5 +134,5 @@ export const openaiExecutor: NodeExecutor<OpenAiData> = async ({
         );
 
         throw error;
-    };
+    }
 }
