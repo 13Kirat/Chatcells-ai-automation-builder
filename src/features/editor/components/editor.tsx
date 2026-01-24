@@ -40,7 +40,17 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
 
     const setEditor = useSetAtom(editorAtom);
 
-    const [nodes, setNodes] = useState<Node[]>(workflow.nodes);
+    const initialNodes = useMemo(() => {
+        return workflow.nodes.map((node) => ({
+            ...node,
+            data: {
+                ...node.data,
+                workflowId,
+            },
+        }));
+    }, [workflow.nodes, workflowId]);
+
+    const [nodes, setNodes] = useState<Node[]>(initialNodes);
     const [edges, setEdges] = useState<Edge[]>(workflow.edges);
 
     const onNodesChange = useCallback(
@@ -58,6 +68,9 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
 
     const hasManualTrigger = useMemo(() => {
         return nodes.some((node) => node.type === NodeType.MANUAL_TRIGGER);
+    }, [nodes]);
+    const hasChatbotTrigger = useMemo(() => {
+        return nodes.some((node) => node.type === NodeType.CHATBOT);
     }, [nodes]);
 
     return (
@@ -81,7 +94,7 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
                 <Controls />
                 <MiniMap />
                 <Panel position="top-right">
-                    <AddNodeButton />
+                    <AddNodeButton workflowId={workflowId} />
                 </Panel>
                 {hasManualTrigger && (
                     <Panel position="bottom-center">

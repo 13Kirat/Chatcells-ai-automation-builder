@@ -5,11 +5,11 @@ import { memo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { NodeSelector } from '@/components/node-selector';
 
-export const AddNodeButton = memo(() => {
+export const AddNodeButton = memo(({ workflowId }: { workflowId: string }) => {
     const [selectOpen, setSelectorOpen] = useState(false);
 
     return (
-        <NodeSelector open={selectOpen} onOpenChange={setSelectorOpen}>
+        <NodeSelector open={selectOpen} onOpenChange={setSelectorOpen} workflowId={workflowId}>
             <Button
                 onClick={() => { () => setSelectorOpen(true) }}
                 size={'icon'}

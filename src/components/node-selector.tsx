@@ -99,12 +99,14 @@ interface NodeSelectorProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     children: React.ReactNode;
+    workflowId: string;
 }
 
 export function NodeSelector({
     open,
     onOpenChange,
     children,
+    workflowId,
 }: NodeSelectorProps) {
     const { setNodes, getNodes, screenToFlowPosition } = useReactFlow();
 
@@ -134,7 +136,7 @@ export function NodeSelector({
 
             const newNode = {
                 id: createId(),
-                data: {},
+                data: { workflowId },
                 position: flowPosition,
                 type: selection.type,
             };
@@ -151,6 +153,7 @@ export function NodeSelector({
         getNodes,
         screenToFlowPosition,
         onOpenChange,
+        workflowId,
     ]);
 
     return (
