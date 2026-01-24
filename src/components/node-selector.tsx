@@ -15,6 +15,7 @@ import {
 import {
     GlobeIcon,
     MousePointerIcon,
+    MessageSquareIcon,
 } from 'lucide-react';
 import { NodeType } from '@/generated/prisma/enums';
 import { Separator } from './ui/separator';
@@ -40,6 +41,12 @@ const triggerNodes: NodeTypeOption[] = [
         label: 'Google Form',
         description: 'Runs the flow when a GoogleForm is submitted',
         icon: '/logos/googleform.svg',
+    },
+    {
+        type: NodeType.CHATBOT,
+        label: 'Chatbot Trigger',
+        description: 'Runs the flow when a message is sent via Chatbot',
+        icon: MessageSquareIcon,
     },
     // {
     //     type: NodeType.STRIPE_TRIGGER,
